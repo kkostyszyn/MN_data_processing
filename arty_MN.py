@@ -1,5 +1,6 @@
 import re
 import sys
+from partic import Participant
 
 def clean(file_name):
 	#Open file in filepath 
@@ -31,51 +32,70 @@ def clean(file_name):
             col_correct = i 
     
     #populate list of reaction times, etc., based on 'filter' column
-    
+    p_list = {}
     partic = ''
-    react_time = []
-    condition=[]
-    correct = []
     
     for l in f[1:]:
-    
-            
+    #generate dictionary of participants
         x = re.split(r",", l)
         if len(x) > 1:
         
             if not partic:
                 partic = x[col_partic]
+                p_list[partic] = Participant(partic)
+            elif partic != x[col_partic]:
                 print("Participant: ", partic)
             if x[col_filter] in ['word', 'nonword']:
-                react_time.append(x[col_react_time])
-                condition.append(x[col_condition])
-                correct.append(x[col_correct])
-                #add_to_list(react_time, condition, correct, x)
+                p_list[partic].update(x[col_react_time], 
+                                        x[col_condition],
+                                        x[col_correct])
+                                        
+    for i in p_list:
+        #Write all values for participant 
+        print("Opening values for", p_list[i].p())
+        p_list[i].write_all("processed_data/" +p_list[i].p()+"_values.csv")
+        #new_file.write(partic + "\t" + temp + "\t" + react_time[i] +"\t"+ correct[i] +"\n")
+        #new_file.close()
+        print("Closing values for", p_list[i].p())
+
         
-    #print("Reaction times: ", react_time)
-    
+        rep, sim, wrd = p_list[i].aggregate()
+
+        #Write sums for participant
+        print("Opening means for", p_list[i].p())
+        sum = open("processed_data/" +p_list[i].p()+"_means.txt", "w+")
+        sum.write(partic + "\trepPSW\t"
+                + str(round((rep[0] / rep[1]))) + "\n")
+        sum.write(partic + "\tsimPSW\t" 
+                + str(round((sim[0] / sim[1]))) + "\n")
+        sum.write(partic + "\tsimWRD\t" 
+                + str(round((sim[0] / sim[1]))))
+        round((rep[0] / rep[1]))
+        sum.close()
+        print("Closing means for", p_list[i].p())
+        
+        
+        #Write averages for participant 
+        print("Opening accuracy for", p_list[i].p())
+        acc = open("processed_data/" +p_list[i].p()+"_acc.txt", "w+")
+        acc.write(partic + "\trepPSW\t"
+                + str(round((rep[2] / rep[3]) * 100)) + "\n")
+        acc.write(partic + "\tsimPSW\t" 
+                + str(round((sim[2] / sim[3]) * 100)) + "\n")
+        acc.write(partic + "\tsimWRD\t" 
+                + str(round((sim[2] / sim[3]) * 100)))
+                
+        round((rep[2] / rep[3]))
+        acc.close()
+        print("Closing accuracy for", p_list[i].p())
+
+        
+        
+        
     #Open new file, add values to new file 
-    new_file = open("processed_data/" +partic+"_values.csv", "w+")
-    
-    #(Save time by aggregating means at the same time)
-    repPSW_mean = 0
-    repPSW_count = 0
-    repPSW_correct = 0
-    repPSW_acc_count = 0
-    
-    simPSW_mean = 0
-    simPSW_count = 0
-    simPSW_correct = 0
-    simPSW_acc_count = 0
 
 
-    simWRD_mean = 0
-    simWRD_count = 0
-    simWRD_correct = 0
-    simWRD_acc_count = 0
-
-
-
+    """
     for i in range(len(react_time)):
         temp = condition[i].strip("\n")
         new_file.write(partic + "\t" + temp + "\t" + react_time[i] +"\t"+ correct[i] +"\n")
@@ -108,39 +128,12 @@ def clean(file_name):
                 simPSW_acc_count+=1
             elif temp == 'simWRD':
                 simWRD_acc_count+=1
-            
-    new_file.close()
-    
-    #print("Accuracy:" + str(simPSW_correct) + " " + str(repPSW_correct) + " " + str(simWRD_correct) + " " )
-    #print("Total:" + str(simPSW_acc_count) + " " + str(repPSW_acc_count) + " " + str(simWRD_acc_count) + " " )
+    """  
+     
     
     
-    #write averages to file 
-    sum = open("processed_data/" +partic+"_means.txt", "w+")
-    #sum.write("ID, repPSW, simPSW, simWRD\n")
-    sum.write(partic + "\trepPSW\t"
-                + str(round((repPSW_mean / repPSW_count))) + "\n")
-    sum.write(partic + "\tsimPSW\t" 
-                + str(round((simPSW_mean / simPSW_count))) + "\n")
-    sum.write(partic + "\tsimWRD\t" 
-                + str(round((simWRD_mean / simWRD_count))))
-                
-    round((repPSW_mean / repPSW_count))
-    sum.close()
+
     
-    #once more for accuracy
-    
-    acc = open("processed_data/" +partic+"_acc.txt", "w+")
-    #sum.write("ID, repPSW, simPSW, simWRD\n")
-    acc.write(partic + "\trepPSW\t"
-                + str(round((repPSW_correct / repPSW_acc_count) * 100)) + "\n")
-    acc.write(partic + "\tsimPSW\t" 
-                + str(round((simPSW_correct / simPSW_acc_count) * 100)) + "\n")
-    acc.write(partic + "\tsimWRD\t" 
-                + str(round((simWRD_correct / simWRD_acc_count) * 100)))
-                
-    round((repPSW_mean / repPSW_count))
-    acc.close()
     
 def round(x):
     """
