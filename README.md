@@ -2,7 +2,7 @@
 
 On command line, run:
 
->python arty_MN.py data/*
+>python arty_MN.py [location of data file]
 
 Output files will include (labeled with participant unique ID):
 
