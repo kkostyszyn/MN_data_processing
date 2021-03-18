@@ -1,18 +1,17 @@
 class Participant:
     """
     Participant class, storing participant ID number, and ordered lists of reaction times, trial conditions, and correct value for M&N experiment.
-    """
-    partic = 0
-    
-    react_time = []
-    condition = []
-    correct = []
+    """ 
+
     
     def __init__(self, partic):
         self.partic = partic
         
+        self.react_time = []
+        self.condition = []
+        self.correct = []
+        
     def __str__(self):
-    
         return self.partic + "\n" + str(self.react_time) + "\n" + str(self.condition) +"\n" + str(self.correct)
         
     def p(self):
@@ -33,15 +32,15 @@ class Participant:
         """
         Write all values to list, given a file path.
         """
-        new_file = open(path, "w+")
+        #new_file = open(path, "w+")
         
         
         for i in range(len(self.react_time)):
             #print("Writing value line.")
             temp = self.condition[i].strip("\n")
-            new_file.write(self.partic + "\t" + temp + "\t" + self.react_time[i] +"\t"+ self.correct[i] +"\n")
+            path.write(self.partic + "\t" + temp + "\t" + self.react_time[i] +"\t"+ self.correct[i] +"\n")
         
-        new_file.close()
+        #new_file.close()
     
     def aggregate(self):
         """
