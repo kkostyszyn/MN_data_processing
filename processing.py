@@ -2,7 +2,7 @@ import re
 import sys
 from partic import Participant
 
-def clean(file_name):
+def clean(file_name, valid_p):
 	#Open file in filepath 
     f = open(file_name)
     f = f.readlines()
@@ -56,43 +56,44 @@ def clean(file_name):
     sum = open("processed_data/means.txt", "w+")
     acc = open("processed_data/acc.txt", "w+")
     total = open("processed_data/values.txt", "w+")
-    
+    print("Participants: ", valid_p)
     for i in p_list:
-        #Write all values for participant 
-        print("Opening values for", p_list[i].p())
-        p_list[i].write_all(total)
-        #new_file.write(partic + "\t" + temp + "\t" + react_time[i] +"\t"+ correct[i] +"\n")
-        #new_file.close()
-        print("Closing values for", p_list[i].p())
+        if i in valid_p:
+            #Write all values for participant 
+            print("Opening values for", p_list[i].p())
+            p_list[i].write_all(total)
+            #new_file.write(partic + "\t" + temp + "\t" + react_time[i] +"\t"+ correct[i] +"\n")
+            #new_file.close()
+            print("Closing values for", p_list[i].p())
 
-        
-        rep, sim, wrd = p_list[i].aggregate()
+            
+            rep, sim, wrd = p_list[i].aggregate()
 
-        #Write sums for participant
-        print("Opening means for", p_list[i].p())
-        #sum = open("processed_data/" +p_list[i].p()+"_means.txt", "w+")
-        sum.write(p_list[i].p() + "\trepPSW\t"
-                + str(round((rep[0] / rep[1]))) + "\n")
-        sum.write(p_list[i].p() + "\tsimPSW\t" 
-                + str(round((sim[0] / sim[1]))) + "\n")
-        sum.write(p_list[i].p() + "\tsimWRD\t" 
-                + str(round((wrd[0] / wrd[1]))) + "\n")
-        round((rep[0] / rep[1]))
-        print("Closing means for", p_list[i].p())
-        
-        
-        #Write averages for participant 
-        print("Opening accuracy for", p_list[i].p())
-        #acc = open("processed_data/" +p_list[i].p()+"_acc.txt", "w+")
-        acc.write(p_list[i].p() + "\trepPSW\t"
-                + str(round((rep[2] / rep[3]) * 100)) + "\n")
-        acc.write(p_list[i].p() + "\tsimPSW\t" 
-                + str(round((sim[2] / sim[3]) * 100)) + "\n")
-        acc.write(p_list[i].p() + "\tsimWRD\t" 
-                + str(round((wrd[2] / wrd[3]) * 100)) + "\n")
-                
-        round((rep[2] / rep[3]))
-        print("Closing accuracy for", p_list[i].p())
+            #Write sums for participant
+            print("Opening means for", p_list[i].p())
+            #sum = open("processed_data/" +p_list[i].p()+"_means.txt", "w+")
+            sum.write(p_list[i].p() + "\trepPSW\t"
+                    + str(round((rep[0] / rep[1]))) + "\n")
+            sum.write(p_list[i].p() + "\tsimPSW\t" 
+                    + str(round((sim[0] / sim[1]))) + "\n")
+            sum.write(p_list[i].p() + "\tsimWRD\t" 
+                    + str(round((wrd[0] / wrd[1]))) + "\n")
+            round((rep[0] / rep[1]))
+            print("Closing means for", p_list[i].p())
+            
+            
+            #Write averages for participant 
+            print("Opening accuracy for", p_list[i].p())
+            #acc = open("processed_data/" +p_list[i].p()+"_acc.txt", "w+")
+            acc.write(p_list[i].p() + "\trepPSW\t"
+                    + str(round((rep[2] / rep[3]) * 100)) + "\n")
+            acc.write(p_list[i].p() + "\tsimPSW\t" 
+                    + str(round((sim[2] / sim[3]) * 100)) + "\n")
+            acc.write(p_list[i].p() + "\tsimWRD\t" 
+                    + str(round((wrd[2] / wrd[3]) * 100)) + "\n")
+                    
+            round((rep[2] / rep[3]))
+            print("Closing accuracy for", p_list[i].p())
         
     sum.close()
     acc.close()    
@@ -100,8 +101,6 @@ def clean(file_name):
         
         
     #Open new file, add values to new file 
-
-
     """
     for i in range(len(react_time)):
         temp = condition[i].strip("\n")
@@ -139,7 +138,26 @@ def clean(file_name):
      
     
     
-
+def find_participants(file_name):
+    
+    f = open(file_name)
+    f = f.readlines()
+        
+    line = f[0]
+    x = re.split(r",|\n", line)
+    col = 0
+    
+    for i in range(len(x)):
+        if x[i] == "Participant Private ID":
+            col = i
+            break
+            
+    participants = []
+    for l in f[1:-1]:
+        x = re.split(r",|\n", l)
+        participants.append(x[i])
+            
+    return participants
     
     
 def round(x):
@@ -159,8 +177,11 @@ def round(x):
 
 if __name__ == "__main__":
 
-	print("Number:", len(sys.argv))
-	print("Args:", str(sys.argv))
+    print("Number:", len(sys.argv))
+    print("Args:", str(sys.argv))
+    
+    #process 1st file to acquire list of valid subjects 
+    participants = find_participants(sys.argv[2])
+    print(participants)
 	
-	
-	clean(sys.argv[1])
+    clean(sys.argv[1], participants)
